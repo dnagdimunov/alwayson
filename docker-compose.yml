@@ -1,0 +1,115 @@
+version: '3.7'
+
+networks:
+  tst-net:
+    external: false
+    name: tst-net
+
+services:
+  HOST1:
+    networks: 
+      - tst-net
+    labels:
+      com.example.service: "mssql"
+      com.example.description: "For storing rdbms data"
+    image: ${SQL_IMAGE}
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+    container_name: ${HOSTNAME1}
+    hostname: ${HOSTNAME1}
+    environment:
+      MSSQL_ENABLE_HADR: 1
+      MSSQL_AGENT_ENABLED: 1
+      SA_PASSWORD: ${SA_PASSWORD}
+      ACCEPT_EULA: "Y"
+      MSSQL_BACKUP_DIR: /var/opt/mssql/backup
+      MSSQL_DATA_DIR: /var/opt/mssql/data
+      MSSQL_LOG_DIR: /var/opt/mssql/log
+      TZ: ${TIMEZONE}
+    volumes:
+      - type: bind
+        source: ${BASE_DIR}/$CNAME/${HOSTNAME1}/data/
+        target: /var/opt/mssql/data
+      - type: bind
+        source: ${BASE_DIR}/$CNAME/${HOSTNAME1}/log/
+        target: /var/opt/mssql/log
+      - type: bind
+        source: ${BASE_DIR}/$CNAME/backup/
+        target: /var/opt/mssql/backup
+    ports:
+      - "20001:1433"
+      - "16021:5022"
+  HOST2:
+    networks: 
+      - tst-net
+    labels:
+      com.example.service: "mssql"
+      com.example.description: "For storing rdbms data"
+    image: ${SQL_IMAGE}
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+    container_name: ${HOSTNAME2}
+    hostname: ${HOSTNAME2}
+    environment:
+      MSSQL_ENABLE_HADR: 1
+      SA_PASSWORD: ${SA_PASSWORD}
+      ACCEPT_EULA: "Y"
+      MSSQL_BACKUP_DIR: /var/opt/mssql/backup
+      MSSQL_DATA_DIR: /var/opt/mssql/data
+      MSSQL_LOG_DIR: /var/opt/mssql/log
+      TZ: ${TIMEZONE}
+    volumes:
+      - type: bind
+        source: ${BASE_DIR}/$CNAME/${HOSTNAME2}/data/
+        target: /var/opt/mssql/data
+      - type: bind
+        source: ${BASE_DIR}/$CNAME/${HOSTNAME2}/log/
+        target: /var/opt/mssql/log
+      - type: bind
+        source: ${BASE_DIR}/$CNAME/backup/
+        target: /var/opt/mssql/backup
+    depends_on:
+      - HOST1
+    ports:
+      - "20002:1433"
+      - "16022:5022"
+  HOST3:
+    networks: 
+      - tst-net
+    labels:
+      com.example.service: "mssql"
+      com.example.description: "For storing rdbms data"
+    image: ${SQL_IMAGE}
+    container_name: ${HOSTNAME3}
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+    hostname: ${HOSTNAME3}
+    environment:
+      MSSQL_ENABLE_HADR: 1
+      SA_PASSWORD: ${SA_PASSWORD}
+      ACCEPT_EULA: "Y"
+      MSSQL_BACKUP_DIR: /var/opt/mssql/backup
+      MSSQL_DATA_DIR: /var/opt/mssql/data
+      MSSQL_LOG_DIR: /var/opt/mssql/log
+      TZ: ${TIMEZONE}
+    volumes:
+      - type: bind
+        source: ${BASE_DIR}/$CNAME/${HOSTNAME3}/data/
+        target: /var/opt/mssql/data
+      - type: bind
+        source: ${BASE_DIR}/$CNAME/${HOSTNAME3}/log/
+        target: /var/opt/mssql/log
+      - type: bind
+        source: ${BASE_DIR}/$CNAME/backup/
+        target: /var/opt/mssql/backup
+    depends_on:
+      - HOST2
+    ports:
+      - "20003:1433"
+      - "16023:5022"

@@ -1,0 +1,57 @@
+FROM mcr.microsoft.com/mssql/server:2022-latest
+USER root
+EXPOSE 1433
+EXPOSE 5022
+
+
+LABEL Project="SQL Server 2019 AG"
+
+ENV ACCEPT_EULA=Y
+ENV MSSQL_PID=Enterprise
+
+RUN apt-get update && \
+    apt-get install -y software-properties-common curl && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN curl https://packages.microsoft.com/keys/microsoft.asc | tee /etc/apt/trusted.gpg.d/microsoft.asc
+RUN add-apt-repository "$(curl https://packages.microsoft.com/config/ubuntu/22.04/mssql-server-2022.list)"
+
+RUN apt-get update
+RUN apt-get install -y mssql-server
+RUN apt-get install -y mssql-tools unixodbc-dev
+
+# Enable availability groups
+# Enable sqlagent
+RUN exec ./opt/mssql/bin/mssql-conf set hadr.hadrenabled 1
+RUN exec ./opt/mssql/bin/mssql-conf set sqlagent.enabled true
+RUN /opt/mssql/bin/mssql-conf traceflag  3226 on
+RUN exec ./opt/mssql/bin/mssql-conf set errorlog.numerrorlogs 10
+#RUN /opt/mssql/bin/mssql-conf set memory.memorylimitmb 2000
+
+RUN mkdir -p /var/opt/mssql/repldata
+RUN exec ./opt/mssql/bin/mssql-conf set telemetry.customerfeedback false
+
+RUN mkdir -p /var/opt/mssql/repldata
+RUN chmod -R u+rX /var/opt/mssql/repldata
+RUN chmod a+rwx /var/opt/mssql/repldata
+
+RUN mkdir -p /var/opt/mssql/data
+RUN chmod a+rwx /var/opt/mssql/data
+RUN chmod 777 /var/opt/mssql/data
+
+RUN mkdir -p /var/opt/mssql/log
+RUN chmod a+rwx /var/opt/mssql/log
+RUN chmod 777 /var/opt/mssql/log
+
+
+# Set permissions (if you are using docker with windows, you don´t need to do this)
+#RUN chown mssql:mssql /usr/certificate/dbmcertificate.pvk
+#RUN chown mssql:mssql /usr/certificate/dbmcertificate.cer
+
+#ssis configuration
+#RUN echo "[TELEMETRY]\nenabled = F" > /var/opt/ssis/ssis.conf
+#RUN SSIS_PID=Express ACCEPT_EULA=Y /opt/ssis/bin/ssis-conf -n setup
+
+USER mssql
+# Run SQL Server process.
+CMD ["/opt/mssql/bin/sqlservr"]
