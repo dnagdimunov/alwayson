@@ -40,9 +40,7 @@ $dockerMountPath = New-DockerRootPath
     10. Restore backup to secondary containers.
     11. Configure AG Group
     12. Add Addventure Works db to AG Group.
-    13. Create Listener # this part still does not work with docker containers
-    14. Create AgTest Database and add to AG Group.
-    15. Dump SA password generated for all instances
+    13. Dump SA password generated for all instances
 
 #>
 
