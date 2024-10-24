@@ -56,6 +56,7 @@ $dockerMountPath = New-DockerRootPath
 #region declares
     $global:pass = $(New-Guid);
     $env:SA_PASSWORD = $global:pass
+    $env:BASE_DIR = $dockerMountPath.FullName + "/Data/sql/"
     
     Write-Verbose "Instance pwd: $pass"
     if ([string]::IsNullOrEmpty($pass) ) {$pass = [System.Web.Security.Membership]::GeneratePassword(10,2)};
